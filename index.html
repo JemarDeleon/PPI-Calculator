@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PPI Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <div style="max-width:600px;margin:auto;padding:20px;border:1px solid #ccc;border-radius:10px;font-family:sans-serif;">
+  <h3>PPI Calculator</h3>
+
+  <label>Choose a preset:
+    <select id="preset" style="width:100%;margin-bottom:10px;">
+      <option value="">-- Select a preset --</option>
+      <option value="1920,1080,24">1080p @ 24”</option>
+      <option value="3840,2160,27">4K UHD @ 27”</option>
+      <option value="1280,720,15.6">720p @ 15.6”</option>
+      <option value="3024,1964,14.2">MacBook Pro 14”</option>
+      <option value="2556,1179,6.1">iPhone 15 Pro</option>
+      <option value="960,540,120">LED Wall @ 120”</option>
+    </select>
+  </label>
+
+  <label>Pixel Width:<br><input id="pxWidth" type="number" style="width:100%;margin-bottom:10px;"></label>
+  <label>Pixel Height:<br><input id="pxHeight" type="number" style="width:100%;margin-bottom:10px;"></label>
+  <label>Diagonal Size:<br>
+    <input id="diagonal" type="number" step="0.01" style="width:65%;margin-right:5px;">
+    <select id="unit" style="width:30%;">
+      <option value="in">in</option>
+      <option value="cm">cm</option>
+      <option value="mm">mm</option>
+    </select>
+  </label>
+  <label style="display:block;margin-top:10px;">(Optional) Print Width (in):<br>
+    <input id="printWidth" type="number" step="0.01" style="width:100%;margin-bottom:10px;">
+  </label>
+
+  <button onclick="calculate()" style="width:100%;padding:10px;background:#e52827;color:white;border:none;border-radius:5px;cursor:pointer;">Calculate</button>
+
+  <div id="result" style="font-weight:bold;margin-top:20px;"></div>
+</div>
+
+<script>
+function convertToInches(value, unit) {
+  switch(unit) {
+    case 'cm': return value / 2.54;
+    case 'mm': return value / 25.4;
+    default: return value;
+  }
+}
+
+function calculate() {
+  const w = parseFloat(document.getElementById("pxWidth").value);
+  const h = parseFloat(document.getElementById("pxHeight").value);
+  const dRaw = parseFloat(document.getElementById("diagonal").value);
+  const unit = document.getElementById("unit").value;
+  const printWidth = parseFloat(document.getElementById("printWidth").value);
+  const d = convertToInches(dRaw, unit);
+
+  if (!w || !h || !d || d === 0) {
+    document.getElementById("result").innerText = "Please enter valid values.";
+    return;
+  }
+
+  const diagonalPixels = Math.sqrt(w * w + h * h);
+  const ppi = diagonalPixels / d;
+
+  let dpiText = "", dpi = null;
+  if (printWidth && printWidth > 0) {
+    dpi = w / printWidth;
+    dpiText = `<br>DPI (for print width): ${dpi.toFixed(2)} dots/in`;
+  }
+
+  document.getElementById("result").innerHTML = `
+    Diagonal Resolution: ${diagonalPixels.toFixed(2)} px<br>
+    PPI: ${ppi.toFixed(2)} pixels/in
+    ${dpiText}
+  `;
+}
+
+document.getElementById("preset").addEventListener("change", function() {
+  const value = this.value;
+  if (value) {
+    const [w, h, d] = value.split(",");
+    document.getElementById("pxWidth").value = w;
+    document.getElementById("pxHeight").value = h;
+    document.getElementById("diagonal").value = d;
+    document.getElementById("unit").value = "in";
+  }
+});
+</script>
+</body>
+</html>
+
+
+
